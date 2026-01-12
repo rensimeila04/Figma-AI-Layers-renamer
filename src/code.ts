@@ -59,3 +59,33 @@ figma.ui.onmessage = async (msg) => {
         figma.ui.postMessage({ type: "layers-renamed", count });
     }
 };
+
+// Listen for selection changes to update token estimates in UI
+figma.on("selectionchange", () => {
+    reportSelectionStats();
+});
+
+// Also report on initial load
+reportSelectionStats();
+
+function reportSelectionStats() {
+    const selection = figma.currentPage.selection;
+    if (selection.length === 0) {
+        figma.ui.postMessage({ type: "selection-changed", payload: { count: 0, estimatedTokens: 0 } });
+        return;
+    }
+
+    // Estimate tokens: roughly 1 token per 4 chars of JSON
+    // We only need a rough estimate.
+    const layersData = selection.map(getNodeData);
+    const jsonString = JSON.stringify(layersData);
+    const estimatedTokens = Math.ceil(jsonString.length / 4);
+
+    figma.ui.postMessage({
+        type: "selection-changed",
+        payload: {
+            count: selection.length,
+            estimatedTokens: estimatedTokens
+        }
+    });
+}
