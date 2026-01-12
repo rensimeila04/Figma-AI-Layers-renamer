@@ -35,14 +35,6 @@ figma.ui.onmessage = async (msg) => {
 
         const layersData = selection.map(getNodeData);
 
-        // We can't make network requests here, so we send data back to UI to do it
-        // We can't make network requests here, so we send data back to UI to do it.
-        // Wait, actually Figma Plugins can make network requests in the UI thread. 
-        // So we should send the layer data to the UI, let the UI call the LLM, 
-        // and then the UI sends back the new names. 
-        // BUT, the msg types suggest the UI initiated this.
-        // So we need to send the layer data BACK to the UI now.
-
         figma.ui.postMessage({
             type: "layers-data-for-ai",
             payload: { layers: layersData, context: msg.context, apiKey: msg.apiKey, model: msg.model }
